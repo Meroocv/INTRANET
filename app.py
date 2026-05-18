@@ -1,5 +1,5 @@
 import re
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, jsonify
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -29,8 +29,8 @@ def logar():
 
     conn.close()  # ✅ FECHA CONEXÃO
 
-    if usuario and check_password_hash(usuario[4], senha):
-        session['usuario'] = usuario[1]  # nome do usuário
+    if usuario and check_password_hash(usuario[6], senha):
+        session['usuario'] = usuario[2]  # nome do usuário
         return redirect('/dashboard')
     else:
         return render_template('login.html', erro="CPF ou senha inválidos")
@@ -98,6 +98,9 @@ def cadastrar_usuario():
     senha = request.form.get('senha')
     confirmar = request.form.get('confirmar_senha')
     cnes = request.form.get('cnes')
+    cbo = request.form.get('cbo')
+    if not cbo:
+        return render_template('cadastro.html', erro="CBO é obrigatório")
 
     # ✅ Senhas iguais
     if senha != confirmar:
@@ -129,9 +132,9 @@ def cadastrar_usuario():
     senha_hash = generate_password_hash(senha)
 
     cursor.execute("""
-        INSERT INTO usuarios (name, cpf, email, senha, cnes)
-        VALUES (?, ?, ?, ?, ?)
-    """, (name, cpf, email, senha_hash, cnes))
+        INSERT INTO usuarios (name, cpf, email, senha, cnes, cbo)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (name, cpf, email, senha_hash, cnes, cbo))
 
     conn.commit()
     conn.close()
@@ -151,9 +154,28 @@ def logout():
     return redirect('/')
 
 
-@app.route('/teste')
-def teste():
-    return "funcionando"
+@app.route('/atualizar_paciente', methods=['POST'])
+def atualizar_paciente():
+    dados = request.get_json()
+
+    conn = conectar()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    UPDATE pacientes
+    SET nome=?, data_nascimento=?, telefone=?
+    WHERE prontuario=?
+""", (
+    dados['nome'],
+    dados['data_nascimento'],
+    dados['telefone'],
+    dados['prontuario']
+))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({'mensagem': 'Paciente atualizado com sucesso!'})
 
 
 app.run(debug=True)

@@ -1,16 +1,18 @@
 {% extends 'base.html' %}
 
 {% block conteudo %}
+<div class="container">
+    <div class="card">
+        <h2>Cadastrar Paciente</h2>
 
-<h2>Cadastrar Paciente</h2>
+        <form action="/salvar_paciente" method="post">
+            <input type="text" name="prontuario" placeholder="Prontuário"><br><br>
+            <input type="text" name="nome" placeholder="Nome"><br><br>
+            <input type="text" name="cns" placeholder="CNS"><br><br>
+            <input type="date" name="data_nascimento"><br><br>
 
-<form action="/salvar_paciente" method="post">
-    <input type="text" name="prontuario" placeholder="Prontuário"><br><br>
-    <input type="text" name="nome" placeholder="Nome"><br><br>
-    <input type="text" name="cns" placeholder="CNS"><br><br>
-    <input type="date" name="data_nascimento"><br><br>
-
-    <button type="submit">Salvar</button>
-</form>
-
+            <button type="submit">Salvar</button>
+        </form>
+    </div>
+</div>
 {% endblock %}
