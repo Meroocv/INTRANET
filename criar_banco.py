@@ -1,50 +1,25 @@
 import sqlite3
 
-conn = sqlite3.connect("database.db")
+# Cria (ou conecta) ao banco
+conn = sqlite3.connect('database.db')
+
+# Cria o cursor
 cursor = conn.cursor()
 
+# Cria a tabela de usuários
 cursor.execute("""
-CREATE TABLE IF NOT EXISTS pacientes (
-    prontuario TEXT PRIMARY KEY,
-    terapeuta_referencia TEXT,
-    nome_paciente TEXT,
-    nome_social TEXT,
-    cns_paciente TEXT,
-    rg TEXT,
-    cpf TEXT,
-    naturalidade TEXT,
-    sexo TEXT,
-    data_nascimento TEXT,
-    raca_cor TEXT,
-    etnia TEXT,
-    orientacao_religiosa TEXT,
-    escolaridade TEXT,
-    nome_mae TEXT,
-    nome_pai TEXT,
-    nome_responsavel TEXT,
-    grau_parentesco_responsavel TEXT,
-    telefone_responsavel TEXT,
-    municipio TEXT,
-    uf TEXT,
-    zona TEXT,
-    cep TEXT,
-    bairro TEXT,
-    tipo TEXT,
-    logradouro TEXT,
-    numero TEXT,
-    complemento TEXT,
-    ddd TEXT,
-    telefone TEXT,
-    data_admissao TEXT,
-    origem_paciente TEXT,
-    especificacao_origem TEXT,
-    cnes_usf TEXT,
-    cid TEXT,
-    status TEXT,
-    data_conclusao TEXT
-);
+CREATE TABLE IF NOT EXISTS usuarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cnes NUMBER NOT NULL,
+    name TEXT NOT NULL,
+    cbo TEXT NOT NULL,
+    cpf TEXT NOT NULL,
+    email TEXT NOT NULL,
+    senha TEXT NOT NULL
+)
 """)
 
+# Salva e fecha
 conn.commit()
 conn.close()
 

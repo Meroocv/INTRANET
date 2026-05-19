@@ -3,6 +3,12 @@ from flask import Flask, render_template, request, redirect, session, jsonify
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 
+conn = sqlite3.connect("database.db")
+cursor = conn.cursor()
+
+cursor.execute("SELECT prontuario FROM pacientes")
+print(cursor.fetchall())
+
 app = Flask(__name__)
 app.secret_key = 'um_segredo_bem_forte_123456'
 
@@ -158,24 +164,118 @@ def logout():
 def atualizar_paciente():
     dados = request.get_json()
 
+    try:
+        conn = conectar()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE pacientes
+            SET
+                terapeuta_referencia=?,
+                nome_paciente=?,
+                nome_social=?,
+                cns_paciente=?,
+                rg=?,
+                cpf=?,
+                naturalidade=?,
+                sexo=?,
+                data_nascimento=?,
+                raca_cor=?,
+                etnia=?,
+                orientacao_religiosa=?,
+                escolaridade=?,
+                nome_mae=?,
+                nome_pai=?,
+                nome_responsavel=?,
+                grau_parentesco_responsavel=?,
+                telefone_responsavel=?,
+                municipio=?,
+                uf=?,
+                zona=?,
+                cep=?,
+                bairro=?,
+                tipo=?,
+                logradouro=?,
+                numero=?,
+                complemento=?,
+                ddd=?,
+                telefone=?,
+                data_admissao=?,
+                origem_paciente=?,
+                especificacao_origem=?,
+                cnes_usf=?,
+                cid=?,
+                status=?,
+                data_conclusao=?
+            WHERE prontuario=?
+        """, (
+            dados.get('terapeuta_referencia'),
+            dados.get('nome_paciente'),
+            dados.get('nome_social'),
+            dados.get('cns_paciente'),
+            dados.get('rg'),
+            dados.get('cpf'),
+            dados.get('naturalidade'),
+            dados.get('sexo'),
+            dados.get('data_nascimento'),
+            dados.get('raca_cor'),
+            dados.get('etnia'),
+            dados.get('orientacao_religiosa'),
+            dados.get('escolaridade'),
+            dados.get('nome_mae'),
+            dados.get('nome_pai'),
+            dados.get('nome_responsavel'),
+            dados.get('grau_parentesco_responsavel'),
+            dados.get('telefone_responsavel'),
+            dados.get('municipio'),
+            dados.get('uf'),
+            dados.get('zona'),
+            dados.get('cep'),
+            dados.get('bairro'),
+            dados.get('tipo'),
+            dados.get('logradouro'),
+            dados.get('numero'),
+            dados.get('complemento'),
+            dados.get('ddd'),
+            dados.get('telefone'),
+            dados.get('data_admissao'),
+            dados.get('origem_paciente'),
+            dados.get('especificacao_origem'),
+            dados.get('cnes_usf'),
+            dados.get('cid'),
+            dados.get('status'),
+            dados.get('data_conclusao'),
+            dados.get('prontuario')
+        ))
+
+        conn.commit()
+        conn.close()
+
+        return jsonify({'mensagem': 'Paciente atualizado com sucesso!'})
+
+    except Exception as e:
+        print("ERRO UPDATE:", e)
+        return jsonify({'erro': str(e)}), 500
+
+@app.route('/buscar_paciente/<prontuario>')
+def buscar_paciente(prontuario):
     conn = conectar()
     cursor = conn.cursor()
 
     cursor.execute("""
-    UPDATE pacientes
-    SET nome=?, data_nascimento=?, telefone=?
-    WHERE prontuario=?
-""", (
-    dados['nome'],
-    dados['data_nascimento'],
-    dados['telefone'],
-    dados['prontuario']
-))
+        SELECT prontuario, nome_paciente
+        FROM pacientes
+        WHERE CAST(prontuario AS INTEGER) = ?
+        """, (int(prontuario),))
 
-    conn.commit()
+    paciente = cursor.fetchone()
     conn.close()
 
-    return jsonify({'mensagem': 'Paciente atualizado com sucesso!'})
+    if paciente:
+        return jsonify({
+            "prontuario": paciente[0],
+            "nome_paciente": paciente[1]
+        })
 
-
+    return jsonify({"erro": "Paciente não encontrado"}), 404
 app.run(debug=True)
