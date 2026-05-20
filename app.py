@@ -72,7 +72,7 @@ def salvar_paciente():
         return redirect('/')
 
     prontuario = request.form.get('prontuario')
-    nome = request.form.get('nome')
+    nome = request.form.get('nome_paciente')
     cns = request.form.get('cns')
     data_nascimento = request.form.get('data_nascimento')
 
@@ -80,7 +80,7 @@ def salvar_paciente():
     cursor = conn.cursor()
 
     cursor.execute("""
-        INSERT INTO pacientes (prontuario, nome, cns, data_nascimento)
+        INSERT INTO pacientes (prontuario, nome_paciente, cns, data_nascimento)
         VALUES (?, ?, ?, ?)
     """, (prontuario, nome, cns, data_nascimento))
 
@@ -257,16 +257,21 @@ def atualizar_paciente():
         print("ERRO UPDATE:", e)
         return jsonify({'erro': str(e)}), 500
 
-@app.route('/buscar_paciente/<prontuario>')
-def buscar_paciente(prontuario):
+@app.route('/buscar_paciente')
+def buscar_paciente():
+    prontuario = request.args.get('prontuario')
+
+    # 👉 remove zeros à esquerda
+    prontuario = prontuario.lstrip('0')
+
     conn = conectar()
     cursor = conn.cursor()
 
     cursor.execute("""
         SELECT prontuario, nome_paciente
         FROM pacientes
-        WHERE CAST(prontuario AS INTEGER) = ?
-        """, (int(prontuario),))
+        WHERE ltrim(prontuario, '0') = ?
+    """, (prontuario,))
 
     paciente = cursor.fetchone()
     conn.close()
@@ -277,5 +282,6 @@ def buscar_paciente(prontuario):
             "nome_paciente": paciente[1]
         })
 
-    return jsonify({"erro": "Paciente não encontrado"}), 404
+    return jsonify({"erro": "Paciente não encontrado"}), 404 
+
 app.run(debug=True)

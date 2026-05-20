@@ -28,11 +28,11 @@
 
                 <!-- PRONTUÁRIO -->
                 <label>Prontuário:</label>
-                <input type="text" id="prontuario" onblur="buscarPaciente()" name="prontuario" required>
+                <input type="text" id="prontuario_atendimento" onblur="buscarPaciente()" name="prontuario" inputmode="numeric" required>
 
                 <!-- NOME (AUTOPREENCHIDO) -->
                 <label>Nome do Paciente:</label>
-                <input type="text" id="nome" name="nome" readonly>
+                <input type="text" id="nome_paciente_atendimento" readonly>
 
                 <!-- DATA -->
                 <label>Data:</label>
@@ -75,19 +75,24 @@
 
     <!-- SCRIPT AUTOPREENCHER -->
     <script>
-        document.getElementById("prontuario").addEventListener("blur", function() {
-            let prontuario = this.value;
+        function buscarPaciente() {
+            let prontuario = document.getElementById("prontuario_atendimento").value.trim();
 
-            fetch(`/buscar_paciente/${prontuario}`)
+            if (!prontuario) return;
+
+            fetch(`/buscar_paciente?prontuario=${prontuario}`)
                 .then(response => response.json())
                 .then(data => {
-                    if (data.nome) {
-                        document.getElementById("nome").value = data.nome;
+                    if (data.nome_paciente) {
+                        document.getElementById("nome_paciente_atendimento").value = data.nome_paciente;
                     } else {
-                        document.getElementById("nome").value = "Paciente não encontrado";
+                        document.getElementById("nome_paciente_atendimento").value = "Paciente não encontrado";
                     }
+                })
+                .catch(() => {
+                    document.getElementById("nome_paciente_atendimento").value = "Erro na busca";
                 });
-        });
+        }
     </script>
 
 </body>

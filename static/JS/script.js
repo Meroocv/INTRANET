@@ -261,25 +261,28 @@ function ordenarTabela(coluna) {
     const indice = ['prontuario', 'terapeuta_referencia', 'nome_paciente', 'nome_social', 'cns_paciente', 'rg', 'cpf', 'naturalidade', 'sexo', 'data_nascimento', 'raca_cor', 'etnia', 'escolaridade', 'nome_mae', 'nome_pai', 'nome_responsavel', 'grau_parentesco_responsavel', 'telefone_responsavel', 'municipio', 'uf', 'zona', 'cep', 'bairro', 'tipo', 'logradouro', 'numero', 'complemento', 'telefone', 'data_admissao', 'origem_paciente', 'especificacao_origem', 'cnes_usf', 'cid', 'status', 'data_conclusao'].indexOf(coluna);
 }
 
-function buscarPaciente() {
-    let prontuario = document.getElementById('prontuario').value.trim();
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("prontuario_atendimento").addEventListener("blur", function() {
+        let prontuario = this.value;
 
-    if (!prontuario) return;
+        console.log("Buscando:", prontuario);
 
-    fetch(`/buscar_paciente/${prontuario}`)
-        .then(res => {
-            if (!res.ok) throw new Error("Paciente não encontrado");
-            return res.json();
-        })
-        .then(data => {
-            document.getElementById('nome_paciente').value = data.nome_paciente;
-        })
-        .catch(err => {
-            console.log(err);
-            document.getElementById('nome_paciente').value = "";
-            alert("Paciente não encontrado");
-        });
-}
+        fetch(`/buscar_paciente?prontuario=${prontuario}`)
+            .then(res => res.json())
+            .then(data => {
+                console.log("Resposta:", data);
+
+                if (data.nome_paciente) {
+                    document.getElementById("nome_paciente_atendimento").value = data.nome_paciente;
+                } else {
+                    document.getElementById("nome_paciente_atendimento").value = "Paciente não encontrado";
+                }
+            })
+            .catch(() => {
+                document.getElementById("nome_paciente_atendimento").value = "Erro na busca";
+            });
+    });
+});
 
 function inserirAtendimento() {
     const prontuario = document.getElementById('prontuario').value;
